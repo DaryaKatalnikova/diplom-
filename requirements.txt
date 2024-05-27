@@ -2,7 +2,7 @@ pika
 pyqt6
 pymysql
 aiohttp
-asyncio
 aiogram
 sqlalchemy
 alembic
+apscheduler

@@ -1,4 +1,4 @@
-
+""" CONFIG OF APP """
 
 DATABASE_URI = "mysql+pymysql://root:HarryPotterand3@localhost:3306/dbasit"
 

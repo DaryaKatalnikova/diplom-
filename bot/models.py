@@ -49,7 +49,7 @@ class Ugroup(Base):
 class Student(Base):
     __tablename__ = 'student'
     id_student: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    telegram_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    telegram_id: Mapped[int] = mapped_column(Integer, nullable=True)
     namee: Mapped[str] = mapped_column(String(100), nullable=False)
     secondname: Mapped[str] = mapped_column(String(100), nullable=False)
     midlename: Mapped[str] = mapped_column(String(100), nullable=False)
