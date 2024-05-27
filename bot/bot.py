@@ -32,7 +32,7 @@ async def start(message: Message, state: FSMContext) -> None:
     await state.set_state(States.register)
 
 
-"""@dp.message(States.register)
+@dp.message(States.register)
 async def register(message: Message, state: FSMContext) -> None:
     student: Student = db.query(Student).filter(Student.email == message.text).first()
     if student:
@@ -40,7 +40,7 @@ async def register(message: Message, state: FSMContext) -> None:
         await bot.send_message(message.from_user.id, "Вы зарегистрированы в системе!")
         await state.set_state(States.debt)
     else:
-        await bot.send_message(message.from_user.id, "Не существует такого пользователя!")"""
+        await bot.send_message(message.from_user.id, "Не существует такого пользователя!")
 
 
 @dp.message(States.debt)
@@ -57,8 +57,3 @@ async def debt(message: Message, state: FSMContext) -> None:
         debt -= pay.summa
     await bot.send_message(student.telegram_id, f"Ваша текущая задолженность - {debt} руб.")
 
-
-@dp.message(States.register)
-async def register(message: Message, state: FSMContext) -> None:
-    await bot.send_message(message.from_user.id, "Вы зарегистрированы в системе!")
-    await bot.send_message(message.from_user.id, "Ваша задолженность составляет - 60000.00 руб.")

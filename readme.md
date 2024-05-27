@@ -30,3 +30,15 @@ all models is mapped in bot/models.py
 
 Bot is based on webhook, deployment on wsgi/gunicorn<br> 
 if you dont need an backend http server, then run from *bot/__init__.py*, function run()
+
+## Run
+
+----
+
+Run local, from python env of project: <br>
+<code>
+python -c "from bot import run; run()"
+</code><br>
+Run env: <br>
+1. Unix-like os - <code>source *evenv*/bin/activate</code>
+2. Windows - <code>*evenv*/Scripts/activate</code>
