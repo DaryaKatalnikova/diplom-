@@ -43,8 +43,16 @@ async def register(message: Message, state: FSMContext) -> None:
         await bot.send_message(message.from_user.id, "Не существует такого пользователя!")
 
 
-@dp.message(States.debt)
-async def debt(message: Message, state: FSMContext) -> None:
+@dp.message(Command("menu"))
+async def menu(message: Message, state: FSMContext) -> None:
+    kb = [[InlineKeyboardButton(text='Заказать справку', callback_data='inquiry'),
+           InlineKeyboardButton(text='Узнать долг', callback_data='debt'), ]]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
+    await bot.send_message(message.from_user.id, 'Что вы хотите сделать?', reply_markup=markup)
+
+
+@dp.callback_query(F.data == 'debt')
+async def debt(message: CallbackQuery, state: FSMContext) -> None:
     student = db.query(Student).filter(Student.telegram_id == message.from_user.id).first()
     dogovor: Dogovor = db.query(Dogovor).filter(Dogovor.id_student == student.id_student).first()
     plan: Plan_pay = db.query(Plan_pay).filter(
@@ -55,5 +63,68 @@ async def debt(message: Message, state: FSMContext) -> None:
                                                weeks=24)).all()
     for pay in pays:
         debt -= pay.summa
-    await bot.send_message(student.telegram_id, f"Ваша текущая задолженность - {debt} руб.")
+    await bot.edit_message_text(chat_id=message.from_user.id, text=f"Ваша текущая задолженность - {debt} руб.")
 
+
+@dp.callback_query(F.data == 'go_back')
+async def go_back(message: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    kb = [[InlineKeyboardButton(text='Заказать справку', callback_data='inquiry'),
+           InlineKeyboardButton(text='Узнать долг', callback_data='debt'), ], ]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
+    await bot.edit_message_text(message_id=message.message.message_id, chat_id=message.from_user.id,
+                                text='Что вы хотите сделать?', reply_markup=markup)
+
+
+@dp.callback_query(F.data == 'inquiry')
+async def inquiry(message: CallbackQuery, state: FSMContext) -> None:
+    kb = [[InlineKeyboardButton(text='Для военкомата', callback_data='inquiry_rectal'),
+           InlineKeyboardButton(text='По месту требования', callback_data='inquiry_request'), ],
+          [InlineKeyboardButton(text='Назад', callback_data='go_back')]]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
+    await bot.edit_message_text(message_id=message.message.message_id, chat_id=message.from_user.id,
+                                text="Для чего вам нужна справка?", reply_markup=markup)
+
+
+@dp.callback_query(F.data == 'inquiry_request')
+async def inquiry_request(message: CallbackQuery, state: FSMContext) -> None:
+    kb = [[InlineKeyboardButton(text='Назад', callback_data='go_back')]]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
+    user: Student = db.query(Student).filter(Student.telegram_id == message.from_user.id).first()
+    birthday = datetime.strptime(user.datehb, "%Y-%m-%d").strftime("%d.%m.%Y")
+    message_text = (f"Заявка на справку по месту требования\n"
+                    f"ФИО: {user.secondname} {user.namee} {user.midlename}\n"
+                    f"Дата рождения: {birthday}\n")
+    #file = create_inquiry(user)
+    await bot.edit_message_text(message_id=message.message.message_id, chat_id=message.from_user.id,
+                                text="Заявка успешно создана!", reply_markup=markup)
+    await bot.send_message(224852677, text=message_text)
+
+
+@dp.callback_query(F.data == 'inquiry_rectal')
+async def inquiry_recal(message: CallbackQuery, state: FSMContext) -> None:
+    kb = [[InlineKeyboardButton(text='Назад', callback_data='go_back')]]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
+    await bot.edit_message_text(message_id=message.message.message_id, chat_id=message.from_user.id,
+                                text="Введите наименование военкомата", reply_markup=markup)
+    await state.set_state(States.rectal_input)
+    message_id = message.message.message_id
+    await state.update_data(dict(msg=message_id))
+
+
+@dp.message(States.rectal_input)
+async def inquiry_rectal_input(message: Message, state: FSMContext) -> None:
+    kb = [[InlineKeyboardButton(text='Назад', callback_data='go_back')]]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
+    user: Student = db.query(Student).filter(Student.telegram_id == message.from_user.id).first()
+    birthday = datetime.strptime(user.datehb, "%Y-%m-%d").strftime("%d.%m.%Y")
+    message_text = (f"Заявка на справку в военкомат\n"
+                    f"Военкомат: {message.text}n"
+                    f"ФИО: {user.secondname} {user.namee} {user.midlename}\n"
+                    f"Дата рождения: {birthday}\n")
+    # file = create_inquiry(user)
+    data = await state.get_data()
+    await bot.edit_message_text(message_id=data["message_id"], chat_id=message.from_user.id,
+                                text="Заявка успешно создана!", reply_markup=markup)
+    await bot.send_message(224852677, text=message_text)
+    await state.clear()
