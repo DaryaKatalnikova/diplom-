@@ -43,7 +43,7 @@ class Ugroup(Base):
     id_group: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, nullable=False)
     name_group: Mapped[str] = mapped_column(String(10), nullable=True)
     id_cours: Mapped[int] = mapped_column(ForeignKey('cours.id_cours'), nullable=True)
-    cours: Mapped["Cours"] = relationship("cours", backref="plan_pay")
+    cours: Mapped["Cours"] = relationship("cours", backref="ugroup")
 
 
 class Student(Base):
@@ -89,7 +89,7 @@ class Dogovor(Base):
     id_student: Mapped[int] = mapped_column(Integer, nullable=True)
     __table_args__ = (ForeignKeyConstraint(['id_student'], ['student.id_student'],
                                         name='fkey_dogovor'), )
-    student: Mapped["Student"] = relationship("student", backref="pay")
+    student: Mapped["Student"] = relationship("student", backref="dogovor")
 
 
 class Ocenki(Base):
@@ -99,7 +99,7 @@ class Ocenki(Base):
     ocenka: Mapped[int] = mapped_column(Integer, nullable=True)
     id_student: Mapped[int] = mapped_column(Integer, nullable=True)
     __table_args__ = (ForeignKeyConstraint(['id_ocenki'], ['student.id_student'], name='fkey_ocenki'), )
-    student: Mapped["Student"] = relationship("student", backref="pay")
+    student: Mapped["Student"] = relationship("student", backref="ocenki")
 
 
 class Roditel(Base):
@@ -118,4 +118,4 @@ class Roditel(Base):
     id_student: Mapped[int] = mapped_column(Integer, nullable=True)
     __table_args__ = (ForeignKeyConstraint(['id_student'], ['student.id_student'],
                                         name='fkey_roditel'), )
-    student: Mapped["Student"] = relationship("student", backref="pay")
+    student: Mapped["Student"] = relationship("student", backref="roditel")
