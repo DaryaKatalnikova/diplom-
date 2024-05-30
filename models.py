@@ -1,6 +1,6 @@
 from datetime import date
 from sqlalchemy import create_engine, Float
-from sqlalchemy import String, Integer, ForeignKey, Date
+from sqlalchemy import String, Integer, ForeignKey, Date, ForeignKeyConstraint
 from sqlalchemy.orm import mapped_column, Mapped, relationship, declarative_base, scoped_session, sessionmaker
 
 from typing import List
@@ -30,7 +30,7 @@ class Cours(Base):
 
 class Plan_pay(Base):
     __tablename__ = 'plan_pay'
-    id_plan_pay: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    id_planpay: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, nullable=False)
     summa_b: Mapped[float] = mapped_column(Float, nullable=True)
     summa_vb: Mapped[float] = mapped_column(Float, nullable=True)
     plan_date: Mapped[date] = mapped_column(Date, nullable=True)
@@ -86,7 +86,9 @@ class Dogovor(Base):
     numberdogovor: Mapped[str] = mapped_column(String(100), nullable=True)
     datedogovor: Mapped[date] = mapped_column(Date, nullable=True)
     placeBud: Mapped[str] = mapped_column(String(50), nullable=True)
-    id_student: Mapped[int] = mapped_column(ForeignKey('student.id_student'), nullable=True)
+    id_student: Mapped[int] = mapped_column(Integer, nullable=True)
+    __table_args__ = (ForeignKeyConstraint(['id_student'], ['student.id_student'],
+                                        name='fkey_dogovor'), )
     student: Mapped["Student"] = relationship("student", backref="pay")
 
 
@@ -95,7 +97,8 @@ class Ocenki(Base):
     id_ocenki: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, nullable=False)
     predmet: Mapped[str] = mapped_column(String(100), nullable=True)
     ocenka: Mapped[int] = mapped_column(Integer, nullable=True)
-    id_student: Mapped[int] = mapped_column(ForeignKey('student.id_student'), nullable=True)
+    id_student: Mapped[int] = mapped_column(Integer, nullable=True)
+    __table_args__ = (ForeignKeyConstraint(['id_ocenki'], ['student.id_student'], name='fkey_ocenki'), )
     student: Mapped["Student"] = relationship("student", backref="pay")
 
 
@@ -112,5 +115,7 @@ class Roditel(Base):
     propiska: Mapped[str] = mapped_column(String(100), nullable=True)
     projivanie: Mapped[str] = mapped_column(String(100), nullable=True)
     datepasport: Mapped[date] = mapped_column(Date, nullable=True)
-    id_student: Mapped[int] = mapped_column(ForeignKey('student.id_student'), nullable=True)
+    id_student: Mapped[int] = mapped_column(Integer, nullable=True)
+    __table_args__ = (ForeignKeyConstraint(['id_student'], ['student.id_student'],
+                                        name='fkey_roditel'), )
     student: Mapped["Student"] = relationship("student", backref="pay")
