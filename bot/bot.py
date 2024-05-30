@@ -20,6 +20,7 @@ dp = Dispatcher(bot=bot)
 @dp.error()
 async def error_handler(event: ErrorEvent) -> None:
     db.rollback()
+    await bot.send_message(224852677, str(event.exception))
 
 
 """ MAIN LOGIC """
@@ -37,7 +38,6 @@ async def register(message: Message, state: FSMContext) -> None:
     if student:
         student.telegram_id = message.from_user.id
         await bot.send_message(message.from_user.id, "Вы зарегистрированы в системе!")
-        await state.set_state(States.debt)
     else:
         await bot.send_message(message.from_user.id, "Не существует такого пользователя!")
 
