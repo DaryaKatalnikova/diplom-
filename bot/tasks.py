@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from bot.bot import bot
-from bot.models import *
+from models import *
 
 
 async def sendNotification():

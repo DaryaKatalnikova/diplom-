@@ -2,10 +2,9 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, \
-    ErrorEvent, KeyboardButton
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ErrorEvent
 from datetime import datetime, timedelta
-from bot.models import *
+from models import *
 from bot.settings import *
 from bot.states import *
 
