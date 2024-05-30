@@ -55,17 +55,20 @@ async def menu(message: Message, state: FSMContext) -> None:
 
 @dp.callback_query(F.data == 'debt')
 async def debt(message: CallbackQuery, state: FSMContext) -> None:
+    kb = [[InlineKeyboardButton(text='Назад', callback_data='go_back')]]
+    markup = InlineKeyboardMarkup(inline_keyboard=kb)
     student = db.query(Student).filter(Student.telegram_id == message.from_user.id).first()
     dogovor: Dogovor = db.query(Dogovor).filter(Dogovor.id_student == student.id_student).first()
     plan: Plan_pay = db.query(Plan_pay).filter(
-        Plan_pay.id_cours == db.query(Ugroup).get(student.id_group).first().id_cours).first()
+        Plan_pay.id_cours == db.query(Ugroup).get(student.id_group).id_cours).first()
     debt = plan.summa_b if dogovor.placeBud == "Бюджет" else plan.summa_vb
     pays: list[Pay] = db.query(Pay).filter(Pay.id_student == student.id_student,
-                                           Pay.pay_date <= datetime.strptime(plan.plan_date, '%Y-%m-%d') - timedelta(
-                                               weeks=24)).all()
+                                           Pay.pay_date >= (plan.plan_date - timedelta(
+                                               weeks=24))).all()
     for pay in pays:
         debt -= pay.summa
-    await bot.edit_message_text(chat_id=message.from_user.id, text=f"Ваша текущая задолженность - {debt} руб.")
+    await bot.edit_message_text(message_id=message.message.message_id, chat_id=message.from_user.id,
+                                text=f"Ваша текущая задолженность - {debt} руб.", reply_markup=markup)
 
 
 @dp.callback_query(F.data == 'go_back')
@@ -93,7 +96,7 @@ async def inquiry_request(message: CallbackQuery, state: FSMContext) -> None:
     kb = [[InlineKeyboardButton(text='Назад', callback_data='go_back')]]
     markup = InlineKeyboardMarkup(inline_keyboard=kb)
     user: Student = db.query(Student).filter(Student.telegram_id == message.from_user.id).first()
-    birthday = datetime.strptime(user.datehb, "%Y-%m-%d").strftime("%d.%m.%Y")
+    birthday = user.datehb.strftime("%d.%m.%Y")
     message_text = (f"Заявка на справку по месту требования\n"
                     f"ФИО: {user.secondname} {user.namee} {user.midlename}\n"
                     f"Дата рождения: {birthday}\n")
@@ -119,14 +122,14 @@ async def inquiry_rectal_input(message: Message, state: FSMContext) -> None:
     kb = [[InlineKeyboardButton(text='Назад', callback_data='go_back')]]
     markup = InlineKeyboardMarkup(inline_keyboard=kb)
     user: Student = db.query(Student).filter(Student.telegram_id == message.from_user.id).first()
-    birthday = datetime.strptime(user.datehb, "%Y-%m-%d").strftime("%d.%m.%Y")
+    birthday = user.datehb.strftime("%d.%m.%Y")
     message_text = (f"Заявка на справку в военкомат\n"
-                    f"Военкомат: {message.text}n"
+                    f"Военкомат: {message.text}\n"
                     f"ФИО: {user.secondname} {user.namee} {user.midlename}\n"
                     f"Дата рождения: {birthday}\n")
     # file = create_inquiry(user)
     data = await state.get_data()
-    await bot.edit_message_text(message_id=data["message_id"], chat_id=message.from_user.id,
+    await bot.edit_message_text(message_id=data["msg"], chat_id=message.from_user.id,
                                 text="Заявка успешно создана!", reply_markup=markup)
     await bot.send_message(224852677, text=message_text)
     await state.clear()
