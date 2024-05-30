@@ -37,7 +37,10 @@ async def register(message: Message, state: FSMContext) -> None:
     student: Student = db.query(Student).filter(Student.email == message.text).first()
     if student:
         student.telegram_id = message.from_user.id
+        db.add(student)
+        db.commit()
         await bot.send_message(message.from_user.id, "Вы зарегистрированы в системе!")
+        await state.clear()
     else:
         await bot.send_message(message.from_user.id, "Не существует такого пользователя!")
 
